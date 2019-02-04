@@ -86,7 +86,7 @@ comm_num = rr.*((1-(rr.^k)).^(1/k));
 rr2 = rr.^2;
 rr_ct = rr.*ct;
 
-cost1 = -C_k/pi;
+cost1 = C_k/pi;
 cost2 = 1/(2*pi*ni_k);
 
 l_vec = length(c_tilde_vec);
