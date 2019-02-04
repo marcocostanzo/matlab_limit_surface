@@ -7,9 +7,9 @@ function m_max = getTaunMax(fn, params)
 % end
 
 if isscalar(params)
-    m_max = 2*params.mu.*getCkNik(params.k)*fn.*getRadius(fn,params);
+    m_max = 2*params.mu.*getXikNuk(params.k)*fn.*getRadius(fn,params);
 else
-    m_max = 2*[params.mu]'.*getCkNik([params.k]').*fn(:).*getRadius(fn,params);
+    m_max = 2*[params.mu]'.*getXikNuk([params.k]').*fn(:).*getRadius(fn,params);
 end
 
 

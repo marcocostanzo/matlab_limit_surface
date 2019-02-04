@@ -35,10 +35,10 @@ end
 initial_time = tic;
 
 %calcola C_k
-C_k = getCk(k);
+Xi_k = getXik(k);
 
 %Calcola ni_k
-ni_k = getNik( k );
+nu_k = getNuk( k );
 
 %Calcola C_k*ni_k
 %C_k_ni_k = getCkNik( k );
@@ -86,8 +86,8 @@ comm_num = rr.*((1-(rr.^k)).^(1/k));
 rr2 = rr.^2;
 rr_ct = rr.*ct;
 
-cost1 = C_k/pi;
-cost2 = 1/(2*pi*ni_k);
+cost1 = Xi_k/pi;
+cost2 = 1/(2*pi*nu_k);
 
 l_vec = length(c_tilde_vec);
 

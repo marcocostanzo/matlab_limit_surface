@@ -1,4 +1,5 @@
 function sigma = getSigma(ft_norm,m_norm,gamma)
+%NB FROM ft_norm m_norm
 
 if isstruct(gamma)
     gamma = [gamma.gamma]';
