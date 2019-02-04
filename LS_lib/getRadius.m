@@ -1,11 +1,17 @@
-function R = getRadius(fn,gamma)
+function R = getRadius(fn,params)
 
-gamma = [gamma.gamma]';
-if isscalar(gamma)
-    R = fn.^(gamma+1);
+if(isscalar(params))
+    R = params.beta*fn.^(params.gamma+1);
 else
-    R = fn(:).^(gamma+1);
+    R = [params.beta]'*fn(:).^([params.gamma]'+1);
 end
+
+% gamma = [gamma.gamma]';
+% if isscalar(gamma)
+%     R = fn.^(gamma+1);
+% else
+%     R = fn(:).^(gamma+1);
+% end
 
 end
 
