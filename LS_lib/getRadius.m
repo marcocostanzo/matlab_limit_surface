@@ -1,17 +1,22 @@
-function R = getRadius(fn,params)
+function R = getRadius(fn,varargin)
 
-if(isscalar(params))
-    R = params.delta*fn.^(params.gamma+1);
-else
-    R = [params.delta]'*fn(:).^([params.gamma]'+1);
+%% Parse Input
+ip = inputParser;
+validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
+addRequired(ip,'fn', @isnumeric);
+addParameter(ip,'delta', [], validScalarPosNum);
+addParameter(ip,'gamma', [], validScalarPosNum);
+
+parse(ip,fn,varargin{:})
+
+if(~isempty(ip.UsingDefaults))
+    error('Parameter ''%s'' is mandatory%s',ip.UsingDefaults{1},s)
 end
 
-% gamma = [gamma.gamma]';
-% if isscalar(gamma)
-%     R = fn.^(gamma+1);
-% else
-%     R = fn(:).^(gamma+1);
-% end
+%% Calc
+
+R = ip.Results.delta * ( ip.Results.fn.^(ip.Results.gamma) );
+
 
 end
 

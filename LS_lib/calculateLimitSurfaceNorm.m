@@ -2,28 +2,7 @@ function [ ft_norm , m_norm ] = calculateLimitSurfaceNorm( c_tilde_vec, k, int_p
 %CALCULATELIMITSURFACE Summary of this function goes here
 %   Detailed explanation goes here
 
-if( ~isscalar(k) )
-   
-    ft_norm = zeros( length(c_tilde_vec), length(k) );
-    m_norm = zeros( length(c_tilde_vec), length(k) );
-    
-    if ~isinf(time_disp_status)
-        disp('Start compute norm LS')
-    end
-    
-    for j = 1:length(k)
-        if ~isinf(time_disp_status)
-            disp('')
-            disp(['norm LS ' num2str(j) '/' num2str(length(k))]);
-        end
-        [ ft_norm(:,j), m_norm(:,j) ] = calculateLimitSurfaceNorm( c_tilde_vec,... 
-                                                                    k(j), ...
-                                                                    int_points,... 
-                                                                    time_disp_status... 
-                                                                   );
-    end
-    return;
-end
+%% Parse Inputs
 
 if( nargin < 3 )
     int_points = 6000;
@@ -31,18 +10,70 @@ end
 if( nargin < 4 )
     time_disp_status = inf;
 end
+assert( all(k>0) && isnumeric(k) , 'k has to be numeric and positive' )
+assert( isnumeric(c_tilde_vec) , 'c_tilde_vec has to be numeric' )
+assert( isnumeric(int_points) && isscalar(int_points) &&  int_points>0, ...
+        'int_points has to be scalar and positive' )
+assert( isnumeric(time_disp_status) && isscalar(time_disp_status) &&  time_disp_status>0, ...
+        'int_points has to be scalar and positive' )    
+
+%% More than 1 LS
+if( ~isscalar(k) )
+   
+    ft_norm = zeros( length(c_tilde_vec), length(k) );
+    m_norm = zeros( length(c_tilde_vec), length(k) );
+    
+    initial_time = tic;
+    
+    if ~isinf(time_disp_status)
+        disp(['Start compute norm LS (x ' num2str(numel(k)) ')...'])
+    end
+    
+    for j = 1:numel(k)
+        
+        if ~isinf(time_disp_status)
+            disp('')
+            disp(['Start compute norm LS ' num2str(j) '/' num2str(numel(k)) '...']);
+            disp('')
+        end
+        
+        [ ft_norm(:,j), m_norm(:,j) ] = calculateLimitSurfaceNorm( c_tilde_vec,... 
+                                                                    k(j), ...
+                                                                    int_points,... 
+                                                                    time_disp_status... 
+                                                                   );
+        if ~isinf(time_disp_status)
+            disp('')
+            disp(['Done norm LS ' num2str(j) '/' num2str(numel(k))])
+            disp(['Elapsed Time: ' num2str(toc(initial_time))]);
+            disp('')
+        end
+    end
+    
+    if ~isinf(time_disp_status)
+            disp('')
+            disp(['Done compute all LS (x ' num2str(numel(k)) ')'])
+            disp(['Elapsed Time: ' num2str(toc(initial_time)) ' s']);
+            disp('')
+    end
+    
+    return;
+end
+
+%% Just 1 LS
 
 initial_time = tic;
 
-%calcola C_k
+%Calc Xi_k
 Xi_k = getXik(k);
 
-%Calcola ni_k
-nu_k = getNuk( k );
+%Calc nu_k
+nu_k = getNuk(k);
 
-%Calcola C_k*ni_k
-%C_k_ni_k = getCkNik( k );
+%Calc Xi_k*nu_k
+%Xi_k_nu_k = getXikNuk( k );
 
+%Allocate gpu memory
 c_tilde_vec = gpuArray(c_tilde_vec);
 
 %Define functions to integrate
@@ -52,8 +83,8 @@ function z = F_ft(c_tilde)
         z = ct .* comm_num;
     else
         z =  ( rr_ct - c_tilde ) ./ sq .* comm_num ;
-        if any((any(isnan((z)))))
-            %warning('nan in F_ft')                                                  ')
+        if any((any(isnan((z))))) %NaN values should be zero (see the plot of F_ft)
+            %warning('nan in F_ft')
             z(isnan(z)) = 0;
             %z(isnan(z)) = press(isnan(z)) .* rr(isnan(z)) ./ sqrt(2);
         end
@@ -66,8 +97,8 @@ function z = F_m(c_tilde)
         z = rr.*comm_num;
     else
         z = (rr - c_tilde.*ct) .* rr ./ sq  .* comm_num;
-        if any(any(isnan((z))))
-            %warning('nan in F_m')                                                   ')
+        if any(any(isnan((z)))) %NaN values should be zero (see the plot of F_m)
+            %warning('nan in F_m')
             z(isnan(z)) = 0;
             %z(isnan(z)) = press(isnan(z)) .* (rr(isnan(z)).^2) ./ sqrt(2);
         end
@@ -86,60 +117,70 @@ comm_num = rr.*((1-(rr.^k)).^(1/k));
 rr2 = rr.^2;
 rr_ct = rr.*ct;
 
+%Constant values
 cost1 = Xi_k/pi;
 cost2 = 1/(2*pi*nu_k);
 
+%Num points to compute
 l_vec = length(c_tilde_vec);
 
+%prealloc
 ft_norm = zeros(l_vec,1);
 m_norm = zeros(l_vec,1);
 
+%Disp status vars
 if ~isinf(time_disp_status)
-    disp('Start compute norm LS...')
+    disp(['Start to compute norm LS (k = ' num2str(k) ')...'])
 end
 last_print_time = tic;
 last_print_char = 0;
 
-for  i = 1:l_vec %[0 logspace(-2,-1,(1+2)*10) linspace(0.1,10,1000) logspace(1,3,40)] %alfa =[0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1 1.2 1.5 2 3 10 10000000] % [0 logspace(-2,1,20)]% 0:0.1:3  %alfa = c/R   ---> c = alfa*R
-   %clc,actual_c 
-   %keyboard
-   %disp(num2str(i/l_vec*100))
+for  i = 1:l_vec
    
-   c_tilde = c_tilde_vec(i);
-   
-   sq = sqrt(rr2 + c_tilde.^2 - 2*rr_ct.*c_tilde);
-   
-   Z = F_ft(c_tilde);
-   
-   Z = trapz(Z) * tt_spac;
-   Z =  trapz(Z) * rr_spac;
-   ft_norm(i) = cost1 * gather(Z);
-   %ft(i) = trapz(theta_,trapz(r_,Z,2));
-   
-   Z = F_m(c_tilde);
-   
-   Z = trapz(Z) * tt_spac;
-   Z =  trapz(Z) * rr_spac;
-   m_norm(i) = cost2 * gather(Z);
-   %m(i) = trapz(theta_,trapz(r_,Z,2));
-   
-   if( toc(last_print_time) >  time_disp_status )
-      last_print_time = tic;
-      fprintf( repmat('\b',1,last_print_char) )
-      last_print_char = 0;
-      last_print_char = last_print_char + fprintf( ['processed = ' num2str(i) '/' num2str(l_vec) ' -> ' num2str((i/l_vec)*100,6) '%%' '\n']); 
-      last_print_char = last_print_char + fprintf( [ 'run time = ' num2str(toc(initial_time)) ' s' '\n' ] );
-   end
-   
+    %select c_tilde
+	c_tilde = c_tilde_vec(i);
+
+    %compute common square root
+	sq = sqrt(rr2 + c_tilde.^2 - 2*rr_ct.*c_tilde);
+
+    %function inside the integral
+	Z = F_ft(c_tilde);
+
+    %integrate
+	Z = trapz(Z) * tt_spac;
+	Z =  trapz(Z) * rr_spac;
+	ft_norm(i) = cost1 * gather(Z);
+	%ft(i) = trapz(theta_,trapz(r_,Z,2));
+
+    %function inside the integral
+	Z = F_m(c_tilde);
+
+    %integrate
+	Z = trapz(Z) * tt_spac;
+	Z =  trapz(Z) * rr_spac;
+	m_norm(i) = cost2 * gather(Z);
+	%m(i) = trapz(theta_,trapz(r_,Z,2));
+
+	if( toc(last_print_time) >  time_disp_status )
+        %Print status
+        last_print_time = tic;
+        fprintf( repmat('\b',1,last_print_char) )
+        last_print_char = 0;
+        last_print_char = last_print_char + fprintf( ['processed = ' num2str(i) '/' num2str(l_vec) ' -> ' num2str((i/l_vec)*100,6) '%%' '\n']); 
+        last_print_char = last_print_char + fprintf( [ 'run time = ' num2str(toc(initial_time)) ' s' '\n' ] );
+	end
+
 end
 
 if ~isinf(time_disp_status)
     fprintf( repmat('\b',1,last_print_char) )
-    last_print_char = 0;
-    last_print_char = last_print_char + fprintf( ['processed = ' num2str(i) '/' num2str(l_vec) ' -> ' num2str((i/l_vec)*100,6) '%%' '\n']); 
-    last_print_char = last_print_char + fprintf( [ 'run time = ' num2str(toc(initial_time)) ' s' '\n' ] );
-    disp('Compute norm LS END!')
-    disp(['elapsed time ' num2str(toc(initial_time)) ' s'])
+    %last_print_char = 0;
+    %last_print_char = last_print_char + ...
+        fprintf( ['processed = ' num2str(i) '/' num2str(l_vec) ' -> ' num2str((i/l_vec)*100,6) '%%' '\n']); 
+    %last_print_char = last_print_char + ...
+        fprintf( [ 'run time = ' num2str(toc(initial_time)) ' s' '\n' ] );
+    disp(['Compute norm LS END! (k = ' num2str(k) ')'])
+    disp(['elapsed time: ' num2str(toc(initial_time)) ' s'])
 end
 
 

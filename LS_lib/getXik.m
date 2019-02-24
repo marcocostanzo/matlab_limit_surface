@@ -1,8 +1,18 @@
 function Xi_k = getXik( k )
 
-Xi_k = (3/2)*k.*(gamma(3./k))./( gamma(1./k) .* gamma(2./k) );
+%% Parse Input
+ip = inputParser;
+validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
+addRequired(ip,'k', validScalarPosNum);
 
-%Xi_k = k / (2* beta(2/k , 1/k + 1) );
+parse(ip,k);
+
+%% Calc
+
+Xi_k =  (3/2)*ip.Results.k.*(gamma(3./ip.Results.k))./  ...
+        ( gamma(1./ip.Results.k) .* gamma(2./ip.Results.k) );
+
+%Xi_k = ip.Results.k / (2* beta(2/ip.Results.k , 1/ip.Results.k + 1) );
 
 end
 
