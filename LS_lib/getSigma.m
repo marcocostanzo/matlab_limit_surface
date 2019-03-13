@@ -93,7 +93,7 @@ if normalized
 else
     
     const = 2* getXikNuk(ip.Results.k) * ip.Results.delta / ...
-            ( (ip.Results.mu)^(ip.Results.gamma+1) );
+            ( (ip.Results.mu)^(ip.Results.gamma) );
     
 end
     
