@@ -67,7 +67,9 @@ if( ~isscalar(k) )
     ft_norm = zeros( length(c_tilde_vec), length(k) );
     m_norm = zeros( length(c_tilde_vec), length(k) );
     
-    initial_time = tic;
+    if ~isinf(time_disp_status)
+        initial_time = tic;
+    end
     
     if ~isinf(time_disp_status)
         disp(['Start compute norm LS (x ' num2str(numel(k)) ')...'])
