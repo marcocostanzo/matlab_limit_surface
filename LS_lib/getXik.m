@@ -37,15 +37,19 @@ assert( validNonNegNum(k) , 'k has to be numeric and non-negative' )
 b_zero = false;
 zero_index = (k == 0);
 if any(zero_index)
-   warning('k contains zero elements -> xi_k(0) = inf') 
-   b_zero = true;
+    if coder.target('MATLAB')
+        warning('k contains zero elements -> xi_k(0) = inf') 
+    end
+    b_zero = true;
 end
 
 b_inf = false;
 inf_idex = ( isinf(k) );
 if any(inf_idex)
-   warning('k contains inf elements -> xi_k(inf) = 1') 
-   b_inf = true;
+    if coder.target('MATLAB')
+    	warning('k contains inf elements -> xi_k(inf) = 1') 
+    end
+    b_inf = true;
 end
 
 %% Calc
