@@ -27,17 +27,39 @@ function XikNuk = getXikNuk( k )
 % https://github.com/marcocostanzo
 
 %% Parse Input
-ip = inputParser;
-validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(ip,'k', validScalarPosNum);
 
-parse(ip,k);
+%validetors
+validNonNegNum = @(x) isnumeric(x) && all(x >= 0);
+
+%check
+assert( validNonNegNum(k) , 'k has to be numeric and non-negative' )
+
+b_zero = false;
+zero_index = (k == 0);
+if any(zero_index)
+   warning('k contains zero elements -> xi_k(0)*nu_k(0) = 0') 
+   b_zero = true;
+end
+
+b_inf = false;
+inf_idex = ( isinf(k) );
+if any(inf_idex)
+   warning('k contains inf elements -> xi_k(inf)*nu_k(inf) = 1/3') 
+   b_inf = true;
+end
 
 %% Calc
 
-XikNuk =    (3/8)  * (gamma(3./ip.Results.k).^2) ./ ...
-          (  gamma(2./ip.Results.k) .* gamma(4./ip.Results.k) );
+XikNuk =    (3/8)  * (gamma(3./k).^2) ./ ...
+          (  gamma(2./k) .* gamma(4./k) );
 
+if b_zero
+   XikNuk(zero_index) = 0; 
+end
 
+if b_inf
+   XikNuk(inf_idex) = 1/3; 
+end
+      
 end
 

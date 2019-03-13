@@ -45,45 +45,83 @@ function sigma = getSigma(ft,tau,varargin)
 % https://github.com/marcocostanzo
 
 %% Parse Input
-ip = inputParser;
-validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(ip,'ft', @isnumeric);
-addRequired(ip,'tau', @isnumeric);
 
-if nargin < 4
-   normalized = true;
-   gamma = varargin{1};
-   addRequired(ip,'gamma', validScalarPosNum);
-   parse(ip,ft,tau,gamma)
+%validators
+validScalarNonNegNum = @(x) isnumeric(x) && isscalar(x) && (x >= 0);
+
+if numel(varargin) == 1
+    %no keyvalue
+    % ft_norm,taun_norm,gamma
+    
+    gamma = varargin{1};
+    normalized = true;
+    
+elseif numel(varargin) == 4
+    %no keyvalue
+    %ft,taun,gamma,k,delta,mu
+    
+    gamma = varargin{1};
+    k = varargin{2};
+    delta = varargin{3};
+    mu = varargin{4};
+    normalized = false;
+
 else
+    %keyvalue
     
-    addParameter(ip,'gamma', [],validScalarPosNum);
-
-    if nargin > 4
-        normalized = false;
-        addParameter(ip,'k', [], validScalarPosNum);
-        addParameter(ip,'delta', [], validScalarPosNum);
-        addParameter(ip,'mu', [], validScalarPosNum);
+    ip = inputParser;
+    addRequired(ip,'ft', @isnumeric);
+    addRequired(ip,'tau', @isnumeric);
+    
+    if nargin < 4
+       normalized = true;
+       gamma = varargin{1};
+       addRequired(ip,'gamma', validScalarNonNegNum);
+       parse(ip,ft,tau,gamma)
     else
-        normalized = true;
+
+        addParameter(ip,'gamma', [],validScalarNonNegNum);
+
+        if nargin > 4
+            normalized = false;
+            addParameter(ip,'k', [], validScalarNonNegNum);
+            addParameter(ip,'delta', [], validScalarNonNegNum);
+            addParameter(ip,'mu', [], validScalarNonNegNum);
+        else
+            normalized = true;
+        end
+
+        parse(ip,ft,tau,varargin{:})
+
+    end
+
+
+
+    if(~isempty(ip.UsingDefaults))
+        s = '';
+        if ~normalized
+           s = ' in the normalized formula'; 
+        end
+        error('Parameter ''%s'' is mandatory%s',ip.UsingDefaults{1},s)
     end
     
-    parse(ip,ft,tau,varargin{:})
-
-end
-
-
-
-if(~isempty(ip.UsingDefaults))
-    s = '';
+    gamma = ip.Results.gamma;
     if ~normalized
-       s = ' in the normalized formula'; 
+        k = ip.Results.k;
+        delta = ip.Results.delta;
+        mu = ip.Results.mu;
     end
-    error('Parameter ''%s'' is mandatory%s',ip.UsingDefaults{1},s)
+        
 end
 
 %Dimension check
 assert( isequal(size(ft),size(tau)), 'ft and tau has to be same size' )
+assert( validScalarNonNegNum(gamma) , 'gamma has to be scalar and non negative' )
+if ~normalized
+    assert( validScalarNonNegNum(k) , 'k has to be scalar and non negative' )
+    assert( validScalarNonNegNum(delta) , 'delta has to be scalar and non negative' )
+    assert( validScalarNonNegNum(mu) , 'mu has to be scalar and non negative' )
+end
 
 %% Calc
 if normalized
@@ -92,9 +130,8 @@ if normalized
     
 else
     
-    const = 2* getXikNuk(ip.Results.k) * ip.Results.delta / ...
-            ( (ip.Results.mu)^(ip.Results.gamma) );
+    const = 2 * getXikNuk(k) * delta / ( mu^gamma );
     
 end
     
-sigma = const*(abs(ft).^(ip.Results.gamma+1)).* sign(ft) ./ tau;
+sigma = const*(abs(ft).^(gamma+1)).* sign(ft) ./ tau;

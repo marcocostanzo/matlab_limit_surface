@@ -35,21 +35,43 @@ function R = getRadius(fn,varargin)
 % https://github.com/marcocostanzo
 
 %% Parse Input
-ip = inputParser;
-validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(ip,'fn', validScalarPosNum);
-addParameter(ip,'delta', [], validScalarPosNum);
-addParameter(ip,'gamma', [], validScalarPosNum);
 
-parse(ip,fn,varargin{:})
+%validators
+validNonNegNum = @(x) isnumeric(x) && all(x >= 0);
+validScalarNonNegNum = @(x) isnumeric(x) && isscalar(x) && (x >= 0);
 
-if(~isempty(ip.UsingDefaults))
-    error('Parameter ''%s'' is mandatory%s',ip.UsingDefaults{1},s)
+if( numel(varargin) == 2 )
+    %no keyvalue    
+    delta = varargin{1};
+    gamma = varargin{2};
+    
+else
+    %keyvalue
+    
+    ip = inputParser;
+    addRequired(ip,'fn', validNonNegNum);
+    addParameter(ip,'delta', [], validScalarNonNegNum);
+    addParameter(ip,'gamma', [], validScalarNonNegNum);
+
+    parse(ip,fn,varargin{:})
+
+    if(~isempty(ip.UsingDefaults))
+        error('Parameter ''%s'' is mandatory%s',ip.UsingDefaults{1},s)
+    end
+    
+    delta = ip.Results.delta;
+    gamma = ip.Results.gamma;
+    
 end
+
+%check
+assert( validNonNegNum(fn) , 'fn has to and non negative' )
+assert( validScalarNonNegNum(delta) , 'delta has to be scalar and non negative' )
+assert( validScalarNonNegNum(gamma) , 'gamma has to be scalar and non negative' )
 
 %% Calc
 
-R = ip.Results.delta * ( ip.Results.fn.^(ip.Results.gamma) );
+R = delta * ( fn.^gamma );
 
 
 end

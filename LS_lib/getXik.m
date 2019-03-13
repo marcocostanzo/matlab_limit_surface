@@ -27,18 +27,43 @@ function Xi_k = getXik( k )
 % https://github.com/marcocostanzo
 
 %% Parse Input
-ip = inputParser;
-validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(ip,'k', validScalarPosNum);
 
-parse(ip,k);
+%validetors
+validNonNegNum = @(x) isnumeric(x) && all(x >= 0);
+
+%check
+assert( validNonNegNum(k) , 'k has to be numeric and non-negative' )
+
+b_zero = false;
+zero_index = (k == 0);
+if any(zero_index)
+   warning('k contains zero elements -> xi_k(0) = inf') 
+   b_zero = true;
+end
+
+b_inf = false;
+inf_idex = ( isinf(k) );
+if any(inf_idex)
+   warning('k contains inf elements -> xi_k(inf) = 1') 
+   b_inf = true;
+end
 
 %% Calc
 
-Xi_k =  (3/2)*ip.Results.k.*(gamma(3./ip.Results.k))./  ...
-        ( gamma(1./ip.Results.k) .* gamma(2./ip.Results.k) );
+% TODO choose the fastest way...
 
-%Xi_k = ip.Results.k / (2* beta(2/ip.Results.k , 1/ip.Results.k + 1) );
+Xi_k =  (3/2)*k.*(gamma(3./k))./  ...
+        ( gamma(1./k) .* gamma(2./k) );
+
+%Xi_k = k ./ (2* beta(2./k , 1./k + 1) );
+
+if b_zero
+   Xi_k(zero_index) = inf; 
+end
+
+if b_inf
+   Xi_k(inf_idex) = 1; 
+end
 
 end
 

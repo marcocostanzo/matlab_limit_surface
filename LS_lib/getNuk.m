@@ -27,15 +27,38 @@ function nu_k  = getNuk( k )
 % https://github.com/marcocostanzo
 
 %% Parse Input
-ip = inputParser;
-validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(ip,'k', validScalarPosNum);
 
-parse(ip,k);
+%validetors
+validNonNegNum = @(x) isnumeric(x) && all(x >= 0);
+
+%check
+assert( validNonNegNum(k) , 'k has to be numeric and non-negative' )
+
+b_zero = false;
+zero_index = (k == 0);
+if any(zero_index)
+   warning('k contains zero elements -> nu_k(0) = 0') 
+   b_zero = true;
+end
+
+b_inf = false;
+inf_idex = ( isinf(k) );
+if any(inf_idex)
+   warning('k contains inf elements -> nu_k(inf) = 1/3') 
+   b_inf = true;
+end
 
 %% Calc
 
-nu_k = beta(3./ip.Results.k , 1./ip.Results.k  + 1)./ip.Results.k;
+nu_k = beta(3./k , 1./k  + 1)./k;
+
+if b_zero
+   nu_k(zero_index) = 0; 
+end
+
+if b_inf
+   nu_k(inf_idex) = 1/3; 
+end
 
 end
 

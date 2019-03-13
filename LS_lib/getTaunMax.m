@@ -37,26 +37,54 @@ function tau_max = getTaunMax(fn, varargin)
 % https://github.com/marcocostanzo
 
 %% Parse Input
-ip = inputParser;
-validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(ip,'fn', @isnumeric);
-addParameter(ip,'mu', [], validScalarPosNum);
-addParameter(ip,'k', [], validScalarPosNum);
-addParameter(ip,'delta', [], validScalarPosNum);
-addParameter(ip,'gamma', [], validScalarPosNum);
 
-parse(ip,fn,varargin{:})
+%validators
+validScalarNonNegNum = @(x) isnumeric(x) && isscalar(x) && (x >= 0);
 
-if(~isempty(ip.UsingDefaults))
-    error('Parameter ''%s'' is mandatory%s',ip.UsingDefaults{1},s)
+if numel(varargin) == 4
+    %no keyvalue
+    mu = varargin{1};
+    k = varargin{2};
+    delta = varargin{3};
+    gamma = varargin{4};
+    
+else
+    %keyvalue
+    
+    ip = inputParser;
+    addRequired(ip,'fn', @isnumeric);
+    addParameter(ip,'mu', [], validScalarNonNegNum);
+    addParameter(ip,'k', [], validScalarNonNegNum);
+    addParameter(ip,'delta', [], validScalarNonNegNum);
+    addParameter(ip,'gamma', [], validScalarNonNegNum);
+
+    parse(ip,fn,varargin{:})
+
+    if(~isempty(ip.UsingDefaults))
+        error('Parameter ''%s'' is mandatory%s',ip.UsingDefaults{1},s)
+    end
+    
+    mu = ip.Results.mu;
+    k = ip.Results.k;
+    delta = ip.Results.delta;
+    gamma = ip.Results.gamma;
+    
 end
+
+%check
+assert( isnumeric(fn) , 'fn has to be numeric' )
+assert( validScalarNonNegNum(mu) , 'mu has to be scalar and non negative' )
+assert( validScalarNonNegNum(k) , 'k has to be scalar and non negative' )
+assert( validScalarNonNegNum(delta) , 'delta has to be scalar and non negative' )
+assert( validScalarNonNegNum(gamma) , 'gamma has to be scalar and non negative' )
+
 
 %% Calc
 
-tau_max =   2 * ip.Results.mu * getXikNuk(ip.Results.k) * ...
-            ip.Results.fn .* getRadius( ip.Results.fn,...
-                                        'delta', ip.Results.delta,...
-                                        'gamma', ip.Results.gamma);
+tau_max =   2 * mu * getXikNuk(k) * ...
+            fn .* getRadius( fn,...
+                             delta,...
+                             gamma);
 
 
 end

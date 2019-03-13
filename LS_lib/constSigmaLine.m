@@ -36,22 +36,43 @@ function y = constSigmaLine(x,varargin)
 % https://github.com/marcocostanzo
 
 %% Parse Input
-ip = inputParser;
+
+%validators
 validScalarNum = @(x) isnumeric(x) && isscalar(x);
-validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(ip,'x', @isnumeric);
-addParameter(ip,'sigma', [], validScalarNum);
-addParameter(ip,'gamma', [], validScalarPosNum);
+validScalarNonNegNum = @(x) isnumeric(x) && isscalar(x) && (x >= 0);
 
-parse(ip,x,varargin{:})
+if( numel(varargin) == 2 )
+    %no keyvalue
+    sigma = varargin{1};
+    gamma = varargin{2};
+    
+else
+    %key value
+    ip = inputParser;
+    addRequired(ip,'x', @isnumeric);
+    addParameter(ip,'sigma', [], validScalarNum);
+    addParameter(ip,'gamma', [], validScalarNonNegNum);
 
-if(~isempty(ip.UsingDefaults))
-    error('Parameter ''%s'' is mandatory%s',ip.UsingDefaults{1},s)
+    parse(ip,x,varargin{:})
+
+    if(~isempty(ip.UsingDefaults))
+        error('Parameter ''%s'' is mandatory%s',ip.UsingDefaults{1},s)
+    end
+    
+    sigma = ip.Results.sigma;
+    gamma = ip.Results.gamma;
+    
 end
+
+%check
+assert( isnumeric(x) , 'x has to be numeric' )
+assert( validScalarNum(sigma) , 'sigma has to be scalar' )
+assert( validScalarNonNegNum(gamma) , 'gamma has to be scalar and non negative' )
+
 
 %% Calc
 
-y = (1/ip.Results.sigma).*(abs(ip.Results.x).^(ip.Results.gamma+1)).*sign(ip.Results.x);
+y = (1/sigma).*(abs(x).^(gamma+1)).*sign(x);
 
 end
 

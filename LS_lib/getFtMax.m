@@ -30,25 +30,38 @@ function ft_max = getFtMax(fn,varargin)
 % https://github.com/marcocostanzo
 
 %% Parse Input
-ip = inputParser;
-validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
-addRequired(ip,'fn', @isnumeric);
 
-if(nargin > 2)
-    addParameter(ip,'mu', [], validScalarPosNum);
+%validators
+validScalarNonNegNum = @(x) isnumeric(x) && isscalar(x) && (x >= 0);
+
+if( numel(varargin) == 1 )
+    %no keyvalue
+    mu = varargin{1};
+    
 else
-    addRequired(ip,'mu', validScalarPosNum);
+    %key value
+    
+    ip = inputParser;
+    addRequired(ip,'fn', @isnumeric);
+    addParameter(ip,'mu', [], validScalarNonNegNum);
+    
+    parse(ip,fn,varargin{:});
+    
+    %if(~isempty(ip.UsingDefaults))
+    %    error('Parameter ''%s'' is mandatory%s',ip.UsingDefaults{1},s)
+    %end
+    
+    mu = ip.Results.mu;
+    
 end
 
-parse(ip,fn,varargin{:});
-
-%if(~isempty(ip.UsingDefaults))
-%    error('Parameter ''%s'' is mandatory%s',ip.UsingDefaults{1},s)
-%end
+%check
+assert( isnumeric(fn) , 'fn has to be numeric' )
+assert( validScalarNonNegNum(mu) , 'mu has to be scalar and non negative' )
 
 %% Calc
 
-ft_max = ip.Results.mu .* ip.Results.fn;
+ft_max = mu .* fn;
 
 end
 
