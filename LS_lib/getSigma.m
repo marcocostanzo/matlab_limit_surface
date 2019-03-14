@@ -2,26 +2,30 @@ function sigma = getSigma(ft,tau,varargin)
 %GETSIGMA compute sigma given the force and the torque.
 %
 %   Normalized inputs:
-%   sigma = getSigma(ft_norm,taun_norm,gamma)
+%   sigma = GETSIGMA(ft_norm,taun_norm,gamma)
 %   or
-%   sigma = getSigma(ft_norm,taun_norm,'gamma',gamma)
+%   sigma = GETSIGMA(ft_norm,taun_norm,'gamma',gamma)
 %   computes the value of sigma given the normalized force and torque, i.e.
 %   ft_norm = ft/ft_max and taun_norm = taun/taun_max
 %  
 %   -----------------------------------------------------------------------
 %
 %   Non-Normalized inputs:
-%   sigma = GETRADIUS(ft, taun, ...key-value params...)
+%   sigma = GETSIGMA(ft, taun, gamma, k, delta, mu)
+%   or
+%   sigma = GETSIGMA(ft, taun, ...key-value params...)
 %   Inputs:
 %       - ft: tangential force.
 %       - taun: torsional moment.
-%   Key-Value Params:
-%       - 'delta': delta, proportional value of the curve.
-%       - 'gamma': gamma/exponent value of the curve.
-%       - 'k': pressure distribution coefficient.
-%       - 'mu': Friction coefficient.
+%       - gamma: gamma/exponent value of the radius model.
+%       - k: pressure distribution coefficient.
+%       - delta: delta, proportional value of the radius model.
+%       - mu: Friction coefficient.
 %   Output
 %       - sigma: sigma value.
+%   Note:
+%       Key-Value interface supported, but do NOT use it with the
+%       codegeneration (e.g. Simulink)
 
 
 % Copyright 2018 Università della Campania Luigi Vanvitelli

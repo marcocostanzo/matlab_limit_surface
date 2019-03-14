@@ -1,17 +1,20 @@
 function R = getRadius(fn,varargin)
 % GETRADIUS computes the radius of the contact area
 %
-%   R = GETRADIUS(fn, ...key-value params...)
+%   R = GETRADIUS(fn, delta, gamma)
 %   computes the radius of the contact area using the model:
 %   y = delta * (fn^gamma)   
 %
 %   Inputs:
 %       - fn: the normal force, must be positive.
-%   Key-Value Params:
-%       - 'delta': delta, proportional value of the curve.
-%       - 'gamma': gamma/exponent value of the curve.
-%   Output
+%       - delta: delta, proportional value of the curve.
+%       - gamma: gamma/exponent value of the curve.
+%   Output:
 %       - R: radius of the contact area.
+%   Note:
+%       Key-Value interface supported, but do NOT use it with the
+%       codegeneration (e.g. Simulink)
+%       R = GETRADIUS(fn, 'delta', delta, 'gamma', gamma)
 
 
 % Copyright 2018 Università della Campania Luigi Vanvitelli

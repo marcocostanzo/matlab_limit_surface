@@ -6,6 +6,9 @@ function ft_max = getFtMax(fn,varargin)
 %   y = GETFTMAX(fn, 'mu', mu)
 %   computes the maximum pure tangential force given the normal force fn
 %   and the friction coefficient mu.
+%   Note:
+%       Do NOT use the key-value interface with the codegeneration 
+%       (e.g. Simulink)
 
 
 

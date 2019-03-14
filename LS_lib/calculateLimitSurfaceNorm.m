@@ -15,7 +15,8 @@ function [ ft_norm , m_norm ] = calculateLimitSurfaceNorm( c_tilde_vec, k, int_p
 %                     integrals. Default 6000.
 %       - time_disp_status: This function will print the status on the
 %                           Command Window every time_disp_status seconds.
-%                           Default inf.
+%                           Default inf (for codegen, e.g. Simulink, it 
+%                           MUST be inf).
 %   Outputs:
 %       - ft_norm: f coordinates of the computed points.
 %                  Size = numel(c_tilde_vec) x numel(k).

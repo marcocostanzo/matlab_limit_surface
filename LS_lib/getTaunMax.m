@@ -1,18 +1,21 @@
 function tau_max = getTaunMax(fn, varargin)
 % GETTAUNMAX compute the maximum pure torsional moment
 %
-%   taun_max = GETTAUNMAX(fn, ...key-value params...)
-%   computes the maximum pure torsional moment given the normal force fn
-%   and the friction and contact parameter.
+%   taun_max = GETTAUNMAX(fn, mu, k, delta, gamma)
+%   computes the maximum pure torsional moment given the normal force fn,
+%   the friction coefficient and contact parameters.
 %   Inputs:
 %       - fn: normal force.
 %   Key-Value Params:
-%       - 'delta': delta, proportional value of the curve.
-%       - 'gamma': gamma/exponent value of the curve.
-%       - 'k': pressure distribution coefficient.
-%       - 'mu': Friction coefficient.
+%       - mu: Friction coefficient.
+%       - k: pressure distribution coefficient.
+%       - delta: delta, proportional value of the radius model.
+%       - gamma: gamma/exponent value of the radius model.
 %   Output
 %       - taun_max: maximum pure torsional friction moment.
+%   Note:
+%       Key-Value interface supported, but do NOT use it with the
+%       codegeneration (e.g. Simulink)
 
 
 

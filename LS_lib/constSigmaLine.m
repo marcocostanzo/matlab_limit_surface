@@ -1,17 +1,20 @@
 function y = constSigmaLine(x,varargin)
 %CONSTSIGMALINE is the curve at constant sigma in the NLS space
 %
-%   y = CONSTSIGMALINE(x, ...key-value params...)
+%   y = CONSTSIGMALINE(x, sigma, gamma)
 %   implements the function:
 %   y = 1/sigma * |x|^(gamma+1) * sign(x)
 %
 %   Inputs:
 %       - x: x-axis values of the curve (i.e., ft_norm values)
-%   Key-Value Params:
-%       - 'sigma': sigma param of the curve.
-%       - 'gamma': gamma/exponent value of the curve.
-%   Output
+%       - sigma: sigma param of the curve.
+%       - gamma: gamma/exponent value of the curve.
+%   Output:
 %       - y: y-axis value of the curve (i.e., taun_norm values)
+%   Note:
+%       Key-Value interface supported, but do NOT use it with the
+%       codegeneration (e.g. Simulink)
+%       y = CONSTSIGMALINE(x, 'sigma', sigma, 'gamma', gamma)
 
 
 
