@@ -1,6 +1,6 @@
 function nu_k  = getNuk( k )
 %GETNUK compute the nuk function
-
+%
 %   nu_k = GETNUK(k)
 %   implements the function
 %   beta(3/k , 1/k  + 1)/k

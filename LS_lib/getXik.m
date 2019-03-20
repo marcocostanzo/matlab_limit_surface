@@ -1,6 +1,6 @@
 function Xi_k = getXik( k )
 %GETNIK compute the xik function
-
+%
 %   Xi_k = GETNIK(k)
 %   implements the function
 %   (3/2) * k * (gamma(3/k))/( gamma(1/k) * gamma(2/k) )

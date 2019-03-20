@@ -1,6 +1,6 @@
 function XikNuk = getXikNuk( k )
 %GETXIKNUK directly computes the product xik * nuk
-
+%
 %   XikNuk = GETXIKNUK(k)
 %   implements the function
 %   (3/8)  * ( gamma(3/k)^2 ) / (  gamma(2/k) * gamma(4/k) )
