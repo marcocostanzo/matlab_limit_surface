@@ -1,4 +1,4 @@
-function [ ft_norm , m_norm ] = calculateLimitSurfaceNorm( c_tilde_vec, k, int_points, time_disp_status )
+function [ ft_norm , m_norm ] = calculateLimitSurfaceNorm( c_tilde_vec, k, int_points, time_disp_status, initial_time )
 %CALCULATELIMITSURFACENORM calculate the normalized values of the Limit
 %Surface (LS)
 %   [ ft_norm , m_norm ] = CALCULATELIMITSURFACENORM( c_tilde_vec, k, 
@@ -55,22 +55,23 @@ end
 if( nargin < 4 )
     time_disp_status = inf;
 end
+if( nargin < 5 )
+    initial_time = tic;
+end
 assert( all(k>0) && isnumeric(k) , 'k has to be numeric and positive' )
 assert( isnumeric(c_tilde_vec) , 'c_tilde_vec has to be numeric' )
 assert( isnumeric(int_points) && isscalar(int_points) &&  int_points>0, ...
         'int_points has to be scalar and positive' )
 assert( isnumeric(time_disp_status) && isscalar(time_disp_status) &&  time_disp_status>0, ...
-        'int_points has to be scalar and positive' )    
+        'time_disp_status has to be scalar and positive' )
+assert( isnumeric(initial_time) && isscalar(initial_time) &&  initial_time>0, ...
+        'initial_time has to be scalar and positive' )
 
 %% More than 1 LS
 if( ~isscalar(k) )
    
     ft_norm = zeros( length(c_tilde_vec), length(k) );
     m_norm = zeros( length(c_tilde_vec), length(k) );
-    
-    if ~isinf(time_disp_status)
-        initial_time = tic;
-    end
     
     if ~isinf(time_disp_status)
         disp(['Start compute norm LS (x ' num2str(numel(k)) ')...'])
@@ -84,11 +85,16 @@ if( ~isscalar(k) )
             disp('')
         end
         
-        [ ft_norm(:,j), m_norm(:,j) ] = calculateLimitSurfaceNorm( c_tilde_vec,... 
+        [ ft_norm_out, m_norm_out ] = calculateLimitSurfaceNorm( c_tilde_vec,... 
                                                                     k(j), ...
                                                                     int_points,... 
-                                                                    time_disp_status... 
+                                                                    time_disp_status,...
+                                                                    initial_time ...
                                                                    );
+        % Put outputs in columns                                                       
+        ft_norm(:,j) = ft_norm_out(:);
+        m_norm(:,j) = m_norm_out(:);
+                                                               
         if ~isinf(time_disp_status)
             disp('')
             disp(['Done norm LS ' num2str(j) '/' num2str(numel(k))])
@@ -108,8 +114,6 @@ if( ~isscalar(k) )
 end
 
 %% Just 1 LS
-
-initial_time = tic;
 
 %Calc Xi_k
 Xi_k = getXik(k);

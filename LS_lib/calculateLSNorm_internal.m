@@ -45,11 +45,11 @@ cost1 = Xi_k/pi;
 cost2 = 1/(2*pi*nu_k);
 
 %Num points to compute
-l_vec = length(c_tilde_vec);
+l_vec = numel(c_tilde_vec);
 
 %prealloc
-ft_norm = zeros(l_vec,1);
-m_norm = zeros(l_vec,1);
+ft_norm = zeros(size(c_tilde_vec));
+m_norm = zeros(size(c_tilde_vec));
 
 %Disp status vars
 if ~isinf(time_disp_status)
@@ -93,6 +93,8 @@ for  i = 1:l_vec
         last_print_char = 0;
         last_print_char = last_print_char + fprintf( ['processed = ' num2str(i) '/' num2str(l_vec) ' ' num2str(n_processed) '/' num2str(n_total) ' -> ' num2str((n_processed/n_total)*100,6) '%%' '\n']); 
         last_print_char = last_print_char + fprintf( [ 'run time = ' num2str(toc(initial_time)) ' s' '\n' ] );
+        ETA = (n_total/n_processed - 1)*(toc(initial_time)/60);
+        last_print_char = last_print_char + fprintf( [ 'ETA SINGLE LS = ' num2str(ETA) ' m' '\n' ] );
 	end
 
 end

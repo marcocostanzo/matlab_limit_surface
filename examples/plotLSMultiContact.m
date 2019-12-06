@@ -20,17 +20,17 @@ int_points = 6000;
 time_disp_status = 10;
 
 contacts{1}.fn = 10;
-contacts{1}.CoP = [0;0];
+contacts{1}.CoP = [0.03; 0.03];
 contacts{1}.contact_params.mu = 0.8;
 contacts{1}.contact_params.delta = 0.00349;
 contacts{1}.contact_params.gamma = 1/3;
 contacts{1}.contact_params.k = 4;
 
 contacts{2} = contacts{1};
-contacts{1}.CoP = -[0;0];
+contacts{1}.CoP = -[0.03; 0.03];
 
 % Build CoR
-[CoR_x,CoR_y] = meshgrid(-0.1:0.001:0.1,-0.1:0.001:0.1);
+[CoR_x,CoR_y] = meshgrid(-0.1:0.01:0.1,-0.1:0.01:0.1);
 CoR = cell(size(CoR_x));
 for i=1:numel(CoR_x); CoR{i} = [CoR_x(i); CoR_y(i)]; end
 
