@@ -19,6 +19,8 @@ addpath('../LS_lib/')
 int_points = 6000;
 time_disp_status = 10;
 
+%% Contacts 
+
 contacts{1}.fn = 10;
 contacts{1}.CoP = [0.03; 0.03];
 contacts{1}.contact_params.mu = 0.8;
@@ -29,16 +31,31 @@ contacts{1}.contact_params.k = 4;
 contacts{2} = contacts{1};
 contacts{1}.CoP = -[0.03; 0.03];
 
-% Build CoR
-[CoR_x,CoR_y] = meshgrid(-0.1:0.01:0.1,-0.1:0.01:0.1);
-CoR = cell(size(CoR_x));
-for i=1:numel(CoR_x); CoR{i} = [CoR_x(i); CoR_y(i)]; end
+%% Build CoR
+% mu = [1/2 1/2];
+% sigma = [1/5 0; 0 1/5];
+% R = mvnrnd(mu,sigma,30000)';
+[CoRx,CoRy] = meshgrid(-0.1:0.005:0.1,-0.1:0.005:0.1);
 
-[ ft, taun ] = LSMultiContact(CoR, contacts, int_points, time_disp_status);
+%% Compute
+[ ftx, fty, taun, contacts ] = LSMultiContact(CoRx, CoRy, contacts, int_points, time_disp_status);
 
-% Extract ft_x ft_y
-ft_x = zeros(size(ft));
-ft_y = zeros(size(ft));
-for i=1:numel(ft); tmp = ft{i}; ft_x(i) = tmp(1); ft_y(i) = tmp(2); end
+%% Plot
 
-figure,surf( ft_x, ft_y, taun )
+figure
+ind = 0;
+for i=1:numel(contacts)
+    ind = ind+1;
+    subplot(numel(contacts),2,ind)
+    surf( contacts{i}.LS_local.ftx, contacts{i}.LS_local.fty, contacts{i}.LS_local.taun )
+    title(['Contact ' num2str(i) ' LS Local'])
+    
+    ind = ind+1;
+    subplot(numel(contacts),2,ind)
+    surf( contacts{i}.LS_global.ftx, contacts{i}.LS_global.fty, contacts{i}.LS_global.taun )
+    title(['Contact ' num2str(i) ' LS Global'])
+end
+
+figure
+surf( ftx, fty, taun )
+title(['Total Global LS'])
