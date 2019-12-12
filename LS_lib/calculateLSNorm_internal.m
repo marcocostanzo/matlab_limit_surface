@@ -62,27 +62,38 @@ for  i = 1:l_vec
    
     %select c_tilde
 	c_tilde = c_tilde_vec(i);
+    
+    %special case
+    if isinf(c_tilde)
+        ft_norm(i) = -1;
+        m_norm(i) = 0;
+    elseif c_tilde == 0
+        ft_norm(i) = 0;
+        m_norm(i) = -1;
+    else
 
-    %compute common square root
-	sq = sqrt(rr2 + c_tilde.^2 - 2*rr_ct.*c_tilde);
+        %compute common square root
+        sq = sqrt(rr2 + c_tilde.^2 - 2*rr_ct.*c_tilde);
 
-    %function inside the integral
-	Z = F_ft(c_tilde);
+        %function inside the integral
+        Z = F_ft(c_tilde);
 
-    %integrate
-	Z = trapz(Z) * tt_spac;
-	Z =  trapz(Z) * rr_spac;
-	ft_norm(i) = cost1 * gather(Z);
-	%ft(i) = trapz(theta_,trapz(r_,Z,2));
+        %integrate
+        Z = trapz(Z) * tt_spac;
+        Z = trapz(Z) * rr_spac;
+        ft_norm(i) = cost1 * gather(Z);
+        %ft(i) = trapz(theta_,trapz(r_,Z,2));
 
-    %function inside the integral
-	Z = F_m(c_tilde);
+        %function inside the integral
+        Z = F_m(c_tilde);
 
-    %integrate
-	Z = trapz(Z) * tt_spac;
-	Z =  trapz(Z) * rr_spac;
-	m_norm(i) = cost2 * gather(Z);
-	%m(i) = trapz(theta_,trapz(r_,Z,2));
+        %integrate
+        Z = trapz(Z) * tt_spac;
+        Z =  trapz(Z) * rr_spac;
+        m_norm(i) = cost2 * gather(Z);
+        %m(i) = trapz(theta_,trapz(r_,Z,2));
+    
+    end
     
     n_processed = n_processed + 1;
 

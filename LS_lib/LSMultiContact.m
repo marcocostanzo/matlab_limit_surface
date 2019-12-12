@@ -1,4 +1,4 @@
-function [ ftx, fty, taun, contacts ] = LSMultiContact(CoRx, CoRy, contacts, int_points, time_disp_status)
+function [ ftx, fty, taun, contacts ] = LSMultiContact(CoRx, CoRy, contacts, int_points, time_disp_status, b_negative)
 %LSMULTICONTACT Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -34,6 +34,9 @@ end
 if( nargin < 4 )
     time_disp_status = inf;
 end
+if(nargin < 5)
+    b_negative = false;
+end
 
 %% Calc for all contacts
 
@@ -58,21 +61,36 @@ for i=1:numel(contacts) %for all contacts
     % Build c_tilde vec of contact i and R_i for all CoRs
     c_tilde_vec_i = zeros(size(CoRx));
     R_i = cell(size(CoRx));
+    radius_i = getRadius( ...
+        contacts{i}.fn, ...
+        contacts{i}.contact_params.delta, ...
+        contacts{i}.contact_params.gamma ...
+        );
     for j=1:numel(CoRx) %for all CoRs
         c_ij = [CoRx(j);CoRy(j)] - contacts{i}.CoP;
         norm_c_ij = norm(c_ij);
-        if norm_c_ij == 0
-            c_tilde_vec_i(j) = 0;
-            x_hat_i = [1;0];
+        if radius_i == 0
+            % the contact is a point
+            if norm_c_ij == 0 
+                % the cor is on the contact point
+                c_tilde_vec_i(j) = 0;
+                x_hat_i = [1;0];
+            else
+                % the cor is not on the contact point
+                c_tilde_vec_i(j) = Inf;
+                x_hat_i = c_ij/norm_c_ij;
+            end
         else
-            c_tilde_vec_i(j) = norm_c_ij ...
-                / ...
-                getRadius( ...
-                    contacts{i}.fn, ...
-                    contacts{i}.contact_params.delta, ...
-                    contacts{i}.contact_params.gamma ...
-                    );
-            x_hat_i = c_ij/norm_c_ij;
+            % the contact is a surface
+            if norm_c_ij == 0
+                % the cor is on the contact point
+                c_tilde_vec_i(j) = 0;
+                x_hat_i = [1;0];
+            else
+                % the cor is not on the contact point (default case)
+                c_tilde_vec_i(j) = norm_c_ij/radius_i;
+                x_hat_i = c_ij/norm_c_ij;
+            end
         end
         R_i{j} = [
             x_hat_i, [-x_hat_i(2); x_hat_i(1)]
@@ -133,5 +151,20 @@ for i=1:numel(contacts) %for all contacts
      	disp('')
     end
         
+end
+
+if b_negative % return a closed surface
+	for i=1:numel(contacts)
+        contacts{i}.LS_local.ftx = [contacts{i}.LS_local.ftx; -contacts{i}.LS_local.ftx]; 
+        contacts{i}.LS_local.fty = [contacts{i}.LS_local.fty; -contacts{i}.LS_local.fty]; 
+        contacts{i}.LS_local.taun = [contacts{i}.LS_local.taun; -contacts{i}.LS_local.taun]; 
+
+        contacts{i}.LS_global.ftx = [contacts{i}.LS_global.ftx; -contacts{i}.LS_global.ftx]; 
+        contacts{i}.LS_global.fty = [contacts{i}.LS_global.fty; -contacts{i}.LS_global.fty]; 
+        contacts{i}.LS_global.taun = [contacts{i}.LS_global.taun; -contacts{i}.LS_global.taun]; 
+	end
+	ftx = [ftx; -ftx];
+	fty = [fty; -fty];
+	taun = [taun; -taun];
 end
 
